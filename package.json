@@ -1,0 +1,20 @@
+{
+  "name": "oed-mcp",
+  "version": "0.1.0",
+  "description": "openEuler Infra gateway (oed CLI) as local MCP tools: CVE security notices, packages, forum, SIG docs, mailman, search, repos, issues.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitcode.com/hourunze/oed-mcp.git"
+  },
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "oed-mcp": "./index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": ["mcp", "modelcontextprotocol", "openeuler", "oed", "cve", "atomgit"],
+  "files": ["index.js", "README.md", "package.json", "LICENSE"]
+}
