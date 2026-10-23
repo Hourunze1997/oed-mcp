@@ -44,6 +44,19 @@ claude mcp add oed -- oed-mcp
 oed-mcp          # JSON-RPC 2.0, one message per line, on stdin/stdout
 ```
 
+**dsh** — a new Cordis entry must use `- insert:` (top-level patch entries only
+override existing ones):
+
+```yaml
+- insert:
+    - id: mcp-oed
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: oed
+        transport: stdio
+        command: oed-mcp
+```
+
 ## Tools
 
 | Tool | Purpose |
