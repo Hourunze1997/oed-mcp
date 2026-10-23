@@ -1,0 +1,12 @@
+# dsh bundle patch: register the published oed-mcp server as an MCP client
+# entry. Requires the client entry to be inserted (top-level patch entries
+# only override existing ones). dsh plugin add runs `npx -y oed-mcp`, which
+# resolves the copy pnpm just installed into this profile (or fetches it).
+- insert:
+    - id: mcp-oed
+      name: '@deepseek-ai/dsh-mcp-client'
+      config:
+        serverName: oed
+        transport: stdio
+        command: npx
+        args: ['-y', 'oed-mcp']

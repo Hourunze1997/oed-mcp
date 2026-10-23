@@ -7,9 +7,11 @@
 // stdout is the protocol channel only — every log line goes to stderr.
 
 import { execFile } from 'node:child_process'
+import { realpathSync } from 'node:fs'
 import { createInterface } from 'node:readline'
+import { fileURLToPath } from 'node:url'
 
-const VERSION = '0.1.0'
+const VERSION = '0.1.1'
 const OED_TIMEOUT_MS = 180_000
 const SERVER_NAME = 'oed-mcp'
 
@@ -192,23 +194,38 @@ function maybeExit() {
 }
 
 let stdinClosed = false
-const rl = createInterface({ input: process.stdin })
-rl.on('line', (line) => {
-  const trimmed = line.trim()
-  if (!trimmed) return
-  let msg
-  try {
-    msg = JSON.parse(trimmed)
-  } catch {
-    replyError(null, -32700, 'Parse error')
-    return
-  }
-  if (typeof msg?.id === 'undefined' || msg.id === null) return // notification
-  handle(msg)
-})
-rl.on('close', () => {
-  stdinClosed = true
-  maybeExit()
-})
 
-process.stderr.write(`${SERVER_NAME} ${VERSION} ready — tools: ${TOOLS.map((t) => t.name).join(', ')}\n`)
+// Only start the stdio loop when executed directly (`oed-mcp` / npx). When
+// dsh imports this package as an installed bundle (plugin-add flow) the
+// module must stay inert — the MCP client entry inserted by cordis.patch.yml
+// is what spawns us as a subprocess. Compare realpaths: npm bins and npx run
+// us through a symlink in node_modules/.bin, so argv[1] != import.meta.url.
+const isMain = (() => {
+  try {
+    return process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)
+  } catch {
+    return false
+  }
+})()
+if (isMain) {
+  const rl = createInterface({ input: process.stdin })
+  rl.on('line', (line) => {
+    const trimmed = line.trim()
+    if (!trimmed) return
+    let msg
+    try {
+      msg = JSON.parse(trimmed)
+    } catch {
+      replyError(null, -32700, 'Parse error')
+      return
+    }
+    if (typeof msg?.id === 'undefined' || msg.id === null) return // notification
+    handle(msg)
+  })
+  rl.on('close', () => {
+    stdinClosed = true
+    maybeExit()
+  })
+
+  process.stderr.write(`${SERVER_NAME} ${VERSION} ready — tools: ${TOOLS.map((t) => t.name).join(', ')}\n`)
+}

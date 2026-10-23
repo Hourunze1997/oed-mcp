@@ -44,8 +44,17 @@ claude mcp add oed -- oed-mcp
 oed-mcp          # JSON-RPC 2.0, one message per line, on stdin/stdout
 ```
 
-**dsh** — a new Cordis entry must use `- insert:` (top-level patch entries only
-override existing ones):
+**dsh** — two ways:
+
+Install as a plugin (appears on the Plugins page; dsh applies the bundled
+patch automatically):
+
+```bash
+dsh plugin add oed-mcp
+```
+
+Or hand-wire the patch (a new Cordis entry must use `- insert:` — top-level
+patch entries only override existing ones):
 
 ```yaml
 - insert:
@@ -54,7 +63,8 @@ override existing ones):
       config:
         serverName: oed
         transport: stdio
-        command: oed-mcp
+        command: npx
+        args: ['-y', 'oed-mcp']
 ```
 
 ## Tools
