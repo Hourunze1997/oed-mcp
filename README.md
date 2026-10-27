@@ -14,9 +14,14 @@ transport-agnostic envelope.
 ## Prerequisites
 
 ```bash
-pip install oed-cli        # the server shells out to `oed`
 node >= 18                 # only to run this server
 ```
+
+The `oed` CLI is picked up from PATH. Not installed? The server bootstraps
+itself — in order: `uvx --from oed-cli oed` (ephemeral venv, no system
+changes; first run downloads the package from PyPI), or a one-shot
+`pip install --user oed-cli`. Opt out with `OED_MCP_AUTO_INSTALL=0` and a
+missing `oed` becomes a clear error telling you (or the model) to install it.
 
 ## Install
 

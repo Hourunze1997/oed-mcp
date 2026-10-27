@@ -1,6 +1,6 @@
 {
   "name": "oed-mcp",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "openEuler Infra gateway (oed CLI) as local MCP tools: CVE security notices, packages, forum, SIG docs, mailman, search, repos, issues.",
   "license": "MIT",
   "repository": {

@@ -7,11 +7,12 @@
 // stdout is the protocol channel only — every log line goes to stderr.
 
 import { execFile } from 'node:child_process'
-import { realpathSync } from 'node:fs'
+import { existsSync, realpathSync } from 'node:fs'
 import { createInterface } from 'node:readline'
+import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const VERSION = '0.1.1'
+const VERSION = '0.2.0'
 const OED_TIMEOUT_MS = 180_000
 const SERVER_NAME = 'oed-mcp'
 
@@ -20,25 +21,112 @@ const SERVER_NAME = 'oed-mcp'
 // it to the model verbatim. Non-zero exit codes are reported through
 // isError so the client renders them as tool failures.
 
-function runOed(args, cb) {
-  execFile(
-    'oed',
-    args,
-    { timeout: OED_TIMEOUT_MS, maxBuffer: 32 * 1024 * 1024 },
-    (err, stdout, stderr) => {
-      const out = String(stdout || '').trim()
-      let exitCode = 0
-      let text = out
-      if (!out) {
-        const reason = err?.killed
-          ? 'oed call aborted'
-          : String(stderr || '').trim() || (err ? `oed failed: ${err.message}` : 'oed produced no output')
-        text = reason
-      }
-      if (err) exitCode = typeof err.code === 'number' ? err.code : 1
-      cb({ exitCode, text })
-    },
+// ---------------------------------------------------------------------------
+// oed runner resolution — `oed` may not be installed. Resolution order:
+//   1. `oed` on PATH (normal case, zero magic)
+//   2. `uvx --from oed-cli oed` (ephemeral venv; first run downloads from PyPI,
+//      nothing system-wide changes)
+//   3. one-shot `pip install --user oed-cli`, then re-check PATH / ~/.local/bin
+// Opt out with OED_MCP_AUTO_INSTALL=0 — then a missing `oed` becomes a hint.
+// Runner successes are cached; resolution failures are not (installing oed
+// mid-session just works on the next call), but the pip attempt itself runs
+// at most once per process.
+
+const AUTO_INSTALL_DISABLED = process.env.OED_MCP_AUTO_INSTALL === '0'
+let runner = null
+let pipTried = false
+
+function log(msg) {
+  process.stderr.write(`oed-mcp: ${msg}\n`)
+}
+
+function hasCmd(cmd) {
+  return new Promise((resolve) => {
+    const [finder, args] =
+      process.platform === 'win32' ? ['where', [cmd]] : ['sh', ['-c', `command -v ${cmd}`]]
+    execFile(finder, args, (err) => resolve(!err))
+  })
+}
+
+function execP(cmd, args, timeoutMs) {
+  return new Promise((resolve) => {
+    execFile(cmd, args, { timeout: timeoutMs, maxBuffer: 32 * 1024 * 1024 }, (err, stdout, stderr) =>
+      resolve({ err, stdout, stderr }),
+    )
+  })
+}
+
+function oedMissingHint(extra) {
+  return (
+    'oed CLI not found on this machine and automatic installation did not succeed.\n' +
+    'Fix: `pip install oed-cli`, or install uv (https://docs.astral.sh/uv/) and retry —\n' +
+    'oed-mcp then fetches oed-cli automatically. Opt out with OED_MCP_AUTO_INSTALL=0.' +
+    (extra ? `\nLast attempt:\n${extra}` : '')
   )
+}
+
+async function getRunner() {
+  if (runner) return runner
+  if (await hasCmd('oed')) {
+    runner = { cmd: 'oed', args: [] }
+    return runner
+  }
+  if (AUTO_INSTALL_DISABLED) {
+    throw new Error(oedMissingHint('(auto-install disabled via OED_MCP_AUTO_INSTALL=0)'))
+  }
+  if (await hasCmd('uvx')) {
+    log('`oed` not on PATH — running via `uvx --from oed-cli oed` (first run downloads the package)')
+    runner = { cmd: 'uvx', args: ['--from', 'oed-cli', 'oed'] }
+    return runner
+  }
+  if (!pipTried) {
+    pipTried = true
+    const pip = (await hasCmd('pip3'))
+      ? ['pip3', 'install']
+      : (await hasCmd('python3'))
+        ? ['python3', '-m', 'pip', 'install']
+        : (await hasCmd('pip'))
+          ? ['pip', 'install']
+          : null
+    if (pip) {
+      log(`no uvx found — trying \`${[...pip, '--user', 'oed-cli'].join(' ')}\``)
+      const r = await execP(pip[0], [...pip.slice(1), '--user', 'oed-cli'], 300_000)
+      if (!r.err) {
+        if (await hasCmd('oed')) {
+          runner = { cmd: 'oed', args: [] }
+          return runner
+        }
+        const userBin = join(process.env.HOME || '', '.local', 'bin', process.platform === 'win32' ? 'oed.exe' : 'oed')
+        if (existsSync(userBin)) {
+          runner = { cmd: userBin, args: [] }
+          return runner
+        }
+      }
+    }
+  }
+  throw new Error(oedMissingHint())
+}
+
+async function runOed(args, cb) {
+  let r
+  try {
+    r = await getRunner()
+  } catch (e) {
+    cb({ exitCode: 1, text: e.message })
+    return
+  }
+  const { err, stdout, stderr } = await execP(r.cmd, [...r.args, ...args], OED_TIMEOUT_MS)
+  const out = String(stdout || '').trim()
+  let exitCode = 0
+  let text = out
+  if (!out) {
+    const reason = err?.killed
+      ? 'oed call aborted'
+      : String(stderr || '').trim() || (err ? `oed failed: ${err.message}` : 'oed produced no output')
+    text = reason
+  }
+  if (err) exitCode = typeof err.code === 'number' ? err.code : 1
+  cb({ exitCode, text })
 }
 
 function resultFor({ exitCode, text }) {
