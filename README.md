@@ -11,29 +11,21 @@ Same three tools and the same model-facing contracts as
 [`dsh-plugin-oed`](https://gitcode.com/hourunze/dsh-plugin-oed), in the
 transport-agnostic envelope.
 
-## Prerequisites
+## Quickstart
 
-```bash
-node >= 18                 # only to run this server
-```
-
-The `oed` CLI is picked up from PATH. Not installed? The server bootstraps
-itself — in order: `uvx --from oed-cli oed` (ephemeral venv, no system
-changes; first run downloads the package from PyPI), or a one-shot
-`pip install --user oed-cli`. Opt out with `OED_MCP_AUTO_INSTALL=0` and a
-missing `oed` becomes a clear error telling you (or the model) to install it.
-
-## Install
-
-After `npm i -g oed-mcp` (or use the `npx -y oed-mcp` form below):
+One prerequisite: **Node ≥ 18**. That's all — the server fetches the `oed`
+CLI by itself on first use (via `uvx`, or a one-shot `pip install --user`),
+or uses it from PATH if you already have it.
 
 **Claude Code**
 
 ```bash
-claude mcp add oed -- oed-mcp
+claude mcp add oed -- npx -y oed-mcp
 ```
 
-**Cursor / Trae / Cline — `mcp.json`**
+**Cursor / Trae / Cline** — put this in the client's `mcp.json`
+(Cursor: `~/.cursor/mcp.json`; Trae: `~/.trae/mcp.json` intl /
+`~/.trae-cn/mcp.json` CN):
 
 ```json
 {
@@ -43,23 +35,42 @@ claude mcp add oed -- oed-mcp
 }
 ```
 
+**Cursor CLI from scratch**
+
+```bash
+curl https://cursor.com/install -fsS | bash   # install the CLI
+cursor-agent login                            # one-time browser auth
+# then write ~/.cursor/mcp.json as above
+```
+
+**dsh**
+
+```bash
+dsh plugin add oed-mcp
+```
+
+**Verify** — ask your client:
+
+> 查一下 CVE-2019-10082 在 openEuler 的安全公告编号和严重程度
+
+Expect it to call `oed_describe` → `oed_call` and answer
+**openEuler-SA-2020-1002 / Medium**.
+
+Everything above works anonymously (CVE, packages, forum, mailman, search).
+Only AtomGit (`ag`) operations need `oed ag login` once — the token is stored
+in the OS keyring.
+
+## Manual setup
+
 **Any client with a raw command** — the server is a plain stdio process:
 
 ```bash
 oed-mcp          # JSON-RPC 2.0, one message per line, on stdin/stdout
 ```
 
-**dsh** — two ways:
-
-Install as a plugin (appears on the Plugins page; dsh applies the bundled
-patch automatically):
-
-```bash
-dsh plugin add oed-mcp
-```
-
-Or hand-wire the patch (a new Cordis entry must use `- insert:` — top-level
-patch entries only override existing ones):
+**dsh, hand-wired** — equivalent to `dsh plugin add`, if you'd rather edit the
+patch yourself (a new Cordis entry must use `- insert:` — top-level patch
+entries only override existing ones):
 
 ```yaml
 - insert:
@@ -84,6 +95,14 @@ Notes baked into the tool descriptions so the model can't trip on them: forum
 `Api-Key`/`Api-Username` are gateway-managed (never pass them), `ag` (AtomGit)
 calls need `oed ag login` once, and body fields only ever go in `body`.
 
+## Bootstrap behavior
+
+Runner resolution order: `oed` on PATH → `uvx --from oed-cli oed` (ephemeral
+venv, nothing system-wide changes) → one-shot `pip install --user oed-cli`.
+Runner successes are cached; failures are not — install `oed` mid-session and
+the next call just works. Set `OED_MCP_AUTO_INSTALL=0` to disable all
+automatic installation and get an actionable error instead.
+
 ## Auth model
 
 This server is **local by design**: it runs on your machine, so authentication
@@ -95,7 +114,8 @@ are out of scope here on purpose.
 ## Layout
 
 One file, zero npm dependencies: `index.js` speaks newline-delimited
-JSON-RPC 2.0 over stdio (the MCP stdio transport) and forwards every tool call
-to `execFile('oed', ...)` — oed's JSON stdout goes to the model verbatim, its
+JSON-RPC 2.0 over stdio (the MCP stdio transport), forwards every tool call to
+the resolved `oed` runner — oed's JSON stdout goes to the model verbatim, its
 fixed exit codes (0 ok / 1 user error / 2 network / 3 upstream / 4 not found)
-surface as `isError` tool results.
+surface as `isError` tool results. A dsh bundle patch (`cordis.patch.yml`)
+makes the same package installable with `dsh plugin add`.
