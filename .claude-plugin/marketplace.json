@@ -1,0 +1,14 @@
+{
+  "name": "oed-marketplace",
+  "owner": {
+    "name": "Hourunze"
+  },
+  "plugins": [
+    {
+      "name": "oed",
+      "source": "./",
+      "description": "openEuler Infra gateway tools: CVE notices, packages, forum, mailman, search, issues.",
+      "version": "0.2.1"
+    }
+  ]
+}

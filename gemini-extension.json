@@ -1,0 +1,11 @@
+{
+  "name": "oed",
+  "version": "0.2.1",
+  "description": "openEuler Infra gateway as MCP tools: CVE notices, packages, forum, mailman, search, issues.",
+  "mcpServers": {
+    "oed-mcp": {
+      "command": "npx",
+      "args": ["-y", "oed-mcp"]
+    }
+  }
+}

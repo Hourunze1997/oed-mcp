@@ -49,6 +49,21 @@ cursor-agent login                            # one-time browser auth
 dsh plugin add oed-mcp
 ```
 
+**Gemini CLI / Qwen Code** — this repo ships `gemini-extension.json` /
+`qwen-extension.json`:
+
+```bash
+gemini extensions install Hourunze1997/oed-mcp   # or: qwen extensions install ...
+```
+
+**Claude Code plugin** — this repo is also a plugin marketplace (bundles the
+`oed-cli` Agent Skill + the MCP server):
+
+```
+/plugin marketplace add Hourunze1997/oed-mcp
+/plugin install oed@oed-marketplace
+```
+
 **Verify** — ask your client:
 
 > 查一下 CVE-2019-10082 在 openEuler 的安全公告编号和严重程度
