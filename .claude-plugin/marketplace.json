@@ -3,6 +3,7 @@
   "owner": {
     "name": "Hourunze"
   },
+  "description": "openEuler Infra gateway as local MCP tools: CVE notices, packages, forum, mailman, search, issues.",
   "plugins": [
     {
       "name": "oed",

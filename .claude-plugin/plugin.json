@@ -11,8 +11,8 @@
   "keywords": ["openeuler", "cve", "security", "mailman", "forum", "mcp"],
   "mcpServers": {
     "oed-mcp": {
-      "command": "npx",
-      "args": ["-y", "oed-mcp"]
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/index.js"]
     }
   }
 }
