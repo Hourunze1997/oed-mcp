@@ -1,0 +1,23 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Hourunze1997/oed-mcp",
+  "description": "openEuler Infra gateway as local MCP tools: CVE notices, packages, forum, mailman, search, issues.",
+  "title": "oed — openEuler Infra Gateway",
+  "websiteUrl": "https://github.com/Hourunze1997/oed-mcp",
+  "repository": {
+    "url": "https://github.com/Hourunze1997/oed-mcp",
+    "source": "github"
+  },
+  "version": "0.2.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "oed-mcp",
+      "version": "0.2.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
