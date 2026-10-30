@@ -1,0 +1,10 @@
+# Smithery configuration: https://smithery.ai/docs/config#smitheryyaml
+startCommand:
+  type: stdio
+  configSchema:
+    # oed-mcp 无需配置项；自动引导安装 oed CLI
+    type: object
+    properties: {}
+  commandFunction:
+    |-
+    (config) => ({ "command": "npx", "args": ["-y", "oed-mcp"] })
