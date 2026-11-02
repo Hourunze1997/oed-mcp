@@ -30,6 +30,7 @@
   ],
   "files": [
     "index.js",
+    "qwen-extension.json",
     "cordis.patch.yml",
     "README.md",
     "package.json",
