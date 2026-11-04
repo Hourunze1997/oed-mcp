@@ -1,5 +1,9 @@
 # oed-mcp
 
+[![M8ven Score](https://m8ven.ai/badge/mcp/hourunze1997-oed-mcp-1coacz?v=acef886b5d730b27f9539f4b4ed95b3a)](https://m8ven.ai/mcp/hourunze1997-oed-mcp-1coacz?s=readme)
+
+[![Claude Code](https://img.shields.io/badge/Claude_Code-supported-2EA043)](https://claude.com/claude-code) [![Cursor](https://img.shields.io/badge/Cursor-supported-2EA043)](https://cursor.com) [![Trae](https://img.shields.io/badge/Trae-supported-2EA043)](https://www.trae.ai) [![Codex CLI](https://img.shields.io/badge/Codex_CLI-supported-2EA043)](https://developers.openai.com/codex) [![Gemini CLI](https://img.shields.io/badge/Gemini_CLI-supported-2EA043)](https://github.com/google-gemini/gemini-cli) [![Qwen Code](https://img.shields.io/badge/Qwen_Code-supported-2EA043)](https://github.com/QwenLM/qwen-code) [![Cline](https://img.shields.io/badge/Cline-supported-2EA043)](https://cline.bot) [![dsh](https://img.shields.io/badge/dsh-supported-2EA043)](https://www.npmjs.com/package/dsh-plugin-oed) [![Any MCP client](https://img.shields.io/badge/any_MCP_client-supported-2EA043)](https://modelcontextprotocol.io)
+
 **openEuler Infra gateway as local MCP tools.**
 
 A zero-dependency [MCP](https://modelcontextprotocol.io) server (stdio) that
