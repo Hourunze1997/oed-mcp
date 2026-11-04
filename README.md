@@ -27,9 +27,10 @@ or uses it from PATH if you already have it.
 claude mcp add oed -- npx -y oed-mcp
 ```
 
-**Cursor / Trae / Cline** — put this in the client's `mcp.json`
-(Cursor: `~/.cursor/mcp.json`; Trae: `~/.trae/mcp.json` intl /
-`~/.trae-cn/mcp.json` CN):
+**Cursor / Trae / Cline** — put this in the client's global `mcp.json`
+(Cursor: `~/.cursor/mcp.json`; Trae: `~/.config/Trae/User/mcp.json` intl /
+`~/.config/Trae CN/User/mcp.json` CN — `~/.trae/mcp.json` is the
+workspace-level convention and is never read globally):
 
 ```json
 {
@@ -57,8 +58,12 @@ dsh plugin add oed-mcp
 `qwen-extension.json`:
 
 ```bash
-gemini extensions install Hourunze1997/oed-mcp   # or: qwen extensions install ...
+gemini extensions install https://github.com/Hourunze1997/oed-mcp --consent
+qwen extensions install https://github.com/Hourunze1997/oed-mcp:oed
 ```
+
+(No owner/repo shorthand — both CLIs want a full git URL; the `:oed` suffix
+picks the extension non-interactively on Qwen.)
 
 **Claude Code plugin** — this repo is also a plugin marketplace (bundles the
 `oed-cli` Agent Skill + the MCP server):
